@@ -319,6 +319,7 @@ public:
 };
 
 
+
 class Disco{
 private:
 	//dentro de los atributos se tendra
@@ -354,24 +355,25 @@ public:
 		string aux=name;
 		//primero las superficies 
 		if (mkdir(aux.c_str()) == 0) cout << "Carpeta creada correctamente" << endl;
-		else cout << "Ha ocurrido un error al crear la carpeta" << endl;
+		else cout << "Ha ocurrido un error al crear la carpeta nombre" << endl;
 		for(int u=1;u<=platos;u++){
 			string aux_;
 			aux_ = aux +"//"+to_string(u);
+			
 			if (mkdir(aux_.c_str()) == 0) cout << "Carpeta creada correctamente" << endl;
-			else cout << "Ha ocurrido un error al crear la carpeta" << endl;
+			else cout << "Ha ocurrido un error al crear la carpeta plato" << endl;
 			for(int i=1;i<=superficies;i++){
 				string aux1;
 				aux1 = aux_ + "//" + to_string(i);
 				//luego las pistas
 				if (mkdir(aux1.c_str()) == 0) cout << "Carpeta creada correctamente" << endl;
-				else cout << "Ha ocurrido un error al crear la carpeta" << endl;
+				else cout << "Ha ocurrido un error al crear la carpeta superficie" << endl;
 				for(int j=1;j<=pistas;j++){
 					string aux2;
 					aux2 = aux1+"//"+to_string(j);
 					//y ultimo en sectores
 					if (mkdir(aux2.c_str()) == 0) cout << "Carpeta creada correctamente" << endl;
-					else cout << "Ha ocurrido un error al crear la carpeta" << endl;
+					else cout << "Ha ocurrido un error al crear la carpeta pista" << endl;
 					for(int k=1;k<=sectores;k++){
 						string chares = aux2+"//"+to_string(k)+".txt";
 						ofstream arch(chares);
@@ -455,13 +457,13 @@ public:
 					//Llamamos al metodo para generar carpetas 
 					crear();
 					//leemos el archivo titanic para insertar
-					cin.ignore();
 					//cout<<"Nombre de la tabla: ";getline(cin,aux);
 					ifstream archivo("titanic.txt");
 					string line;
 					
 					//Mediante el algoritmo insertamos los datos
 					int ite=1,ite1=1,ite2=1,ite3=1,ite4=1;
+					cout<<"INICIO LA INSERCION."<<endl;
 					do{
 						if(ite<=platos){
 							if(ite1<=superficies){
@@ -696,7 +698,7 @@ public:
 										void Esquema(string tabla){
 											ifstream archivo(tabla);
 											string line;
-											string esquemaLine = tabla.substr(0,tabla.find(".s"));
+											string esquemaLine = tabla.substr(0,tabla.find("."));
 											getline(archivo,line);
 											int pos=0,cont;
 											for(int i=0;i!=line.size();i++){
@@ -714,8 +716,7 @@ public:
 											int opc;
 											string aux;
 											ifstream ar("titanic.txt");
-											
-											
+
 											string line;
 											getline(ar,line);
 											tamanio_registros=line.size();
@@ -874,30 +875,42 @@ void leerRegistro(std::ifstream& archivo, Registro& registro) {
 	std::getline(archivo, registro.apellido, '\0');
 }
 
+
+void esquema(){
+	string table,line;
+	cout<<"Nombre de la tabla: ";
+	getline(cin,table);
+	
+	ifstream archivo(table);
+	getline(archivo,line);
+	string cadena= table+"#";
+	
+	int pos=0;
+	string aux;
+	for(int i=0;i!=line.size()+1;i++){
+		if(line[i]==',' || i==line.size()){
+			aux = line.substr(pos,i-pos);
+			pos = i+1;
+			cadena += aux+"|";
+			cout<<"Tipo de dato de "<<aux<<": ";getline(cin,aux);
+			cadena += aux;
+			if(aux == "VARCHAR"){
+				cout<<"Cuantos bytes: ";getline(cin,aux);
+				cadena += "("+aux+")";
+			}
+			cadena += "#";
+		}
+		
+	}
+	ofstream arch("esquema.txt",ios::app);
+	arch<<cadena<<endl;
+	arch.close();
+}
 int main()
 {				
 	//se define un objero disco
-	//Disco disco;
-	//menu_inicial(disco);
-	Registro registro1 = {1, "John", "Doe"};
-	Registro registro2 = {2, "Jane", "Smith"};
-	
-	// Escribir registros en un archivo
-	std::ofstream archivo("registros.bin", std::ios::binary);
-	escribirRegistro(archivo, registro1);
-	escribirRegistro(archivo, registro2);
-	archivo.close();
-	
-	// Leer registros del archivo
-	std::ifstream archivoLectura("registros.bin", std::ios::binary);
-	Registro registroLectura1, registroLectura2;
-	leerRegistro(archivoLectura, registroLectura1);
-	leerRegistro(archivoLectura, registroLectura2);
-	archivoLectura.close();
-	
-	// Imprimir los registros leídos
-	std::cout << "Registro 1: " << registroLectura1.id << ", " << registroLectura1.nombre << ", " << registroLectura1.apellido << std::endl;
-	std::cout << "Registro 2: " << registroLectura2.id << ", " << registroLectura2.nombre << ", " << registroLectura2.apellido << std::endl;
-	
+	Disco disco;
+	menu_inicial(disco);
+
 	return 0;
 }
