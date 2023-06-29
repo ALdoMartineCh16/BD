@@ -4,6 +4,7 @@
 #include <sstream>
 #include <direct.h> //mkdir	
 #include <cstring>
+#include <string>
 #include <cstdlib>
 #include <unordered_map>
 #include <list>
@@ -329,7 +330,7 @@ private:
 	int pistas;
 	int sectores;
 	int registros;
-	int tamanio_registros; //tamañio de cada registros
+	int tamanio_registros = 0; //tamañio de cada registros
 	
 public:
 	Disco(){}
@@ -384,7 +385,81 @@ public:
 			}
 		}
 	}
-		
+		void imprimir_disco(){
+			for(int l=1;l<=platos;l++){
+				for(int k=1;k<=superficies;k++){
+					for(int j=1;j<=pistas;j++){
+						for(int i=1;i<=sectores;i++){
+							string sector_= name+"//"+to_string(l)+"//"+to_string(k)+"//"+to_string(j)+"//"+to_string(i)+".txt"; // se abre el archivo.txt con esta direccion
+							ifstream archivo(sector_);
+							string linea;
+							cout<<"Direccion: "<<sector_<<endl;
+							while(getline(archivo,linea)){
+								cout<<linea<<endl;
+							}
+							cout<<"\n\n";
+						}
+					}
+				}
+			}
+			mostrar_informacion();
+			cout<<"Tamanio en bytes del disco: "<<tamanio_sector()*sectores*pistas*superficies*platos<<endl;
+		}
+		void imprimir_plato(){
+			int plato;
+			cout<<"plato: ";cin>>plato;
+			
+			for(int k=1;k<=superficies;k++){
+				for(int j=1;j<=pistas;j++){
+					for(int i=1;i<=sectores;i++){
+						string sector_= name+"//"+to_string(plato)+"//"+to_string(k)+"//"+to_string(j)+"//"+to_string(i)+".txt"; // se abre el archivo.txt con esta direccion
+						ifstream archivo(sector_);
+						string linea;
+						cout<<"Direccion: "<<sector_<<endl;
+						while(getline(archivo,linea)){
+							cout<<linea<<endl;
+						}
+						cout<<"\n\n";
+					}
+				}
+			}
+			cout<<"Tamanio de pista "<<tamanio_sector()*sectores*pistas*superficies<<endl;
+		}
+		void imprimir_superficie(){
+			int array[2];
+			cout<<"plato: ";cin>>array[1];
+			cout<<"superficie: ";cin>>array[0];
+			for(int j=1;j<=pistas;j++){
+				for(int i=1;i<=sectores;i++){
+					string sector_= name+"//"+to_string(array[1])+"//"+to_string(array[0])+"//"+to_string(j)+"//"+to_string(i)+".txt"; // se abre el archivo.txt con esta direccion
+					ifstream archivo(sector_);
+					string linea;
+					cout<<"Direccion: "<<sector_<<endl;
+					while(getline(archivo,linea)){
+						cout<<linea<<endl;
+					}
+					cout<<"\n\n";
+				}
+			}
+			cout<<"Tamanio de pista "<<tamanio_sector()*sectores*pistas;
+		}
+		void imprimir_pista(){
+			int array[3];
+			cout<<"plato: ";cin>>array[2];
+			cout<<"superficie: ";cin>>array[0];
+			cout<<"pista: ";cin>>array[1];
+			for(int i=1;i<=sectores;i++){
+				string sector_= name+"//"+to_string(array[2])+"//"+to_string(array[0])+"//"+to_string(array[1])+"//"+to_string(i)+".txt"; // se abre el archivo.txt con esta direccion
+				ifstream archivo(sector_);
+				string linea;
+				cout<<"Direccion: "<<sector_<<endl;
+				while(getline(archivo,linea)){
+					cout<<linea<<endl;
+				}
+				cout<<"\n\n";
+			}
+			cout<<"Tamanio de pista "<<tamanio_sector()*sectores;
+		}
 		void imprimir_sector(){
 			int array[4];
 			//Para la impresion de un sector es necesario datos como
@@ -453,6 +528,7 @@ public:
 				void insertar_datos(){
 					//Imprimimos informacion del disco
 					cout<<"Disco:\nSuperficies: "<<superficies<<"\npistas: "<<pistas<<"\nSectores: "<<sectores<<"\nRegistros:  "<<registros<<endl;
+					
 					int a;
 					//Llamamos al metodo para generar carpetas 
 					crear();
@@ -663,6 +739,7 @@ public:
 														break;
 													}
 													mruBufferManager.refer(N_bloque);
+													mruBufferManager.printBuffer();
 												}
 											}
 												
@@ -678,6 +755,7 @@ public:
 															break;
 														}
 														clockBufferManager.refer(N_bloque);
+														clockBufferManager.printBuffer();
 													}
 												}
 													
@@ -711,16 +789,60 @@ public:
 												}
 											}
 										}
+											int Esquema_leer(){
+												string nombre;
+												//Para manipular un disco que ya existe
+												//se abre un txt que tiene al disco y se busca por el nombre
+												cout<<"Nombre de la base de datos: ";getline(cin,nombre);
+												ifstream archivo("esquema.txt");
+												string line,aux;
+												//la informacion de cada disco(nombre,superficies,etc)
+												while(!archivo.eof()){
+													getline(archivo,line);
+													if(nombre==line.substr(0,line.find("#"))){ //se divide por "/"
+														aux=line;
+														break;
+													}
+												}
+												archivo.close();
+												if(line.size()!=0){
+													line.erase(0,line.find("#")+1);
+													
+													int cont =0, tam=line.size();
+													string data;
+													while(line.size()>0){
+														data = line.substr(line.find("|")+1,line.find("#")-line.find("|")-1);
+														cout<<data<<endl;
+														if(data=="int64"){
+															cont +=4;	
+														}else if(data=="float64"){
+															cont +=4;
+														}else{
+															string a = data.substr(data.find("(")+1,data.find(")")-data.find("(")-1);
+															cont += stoi(a);
+														}
+														line.erase(0,line.find("#")+1);
+														
+													}
+													return cont;
+												}
+												return 1;
+											}
+										void mostrar_informacion(){
+											cout<<"Informacion del disco: "<<endl;
+											cout<<"Platos: "<<platos<<endl;
+											cout<<"Pistas: "<<pistas<<endl;
+											cout<<"sectores: "<<sectores<<endl;
+											cout<<"Nro de registros por sector: "<<registros<<endl;
+											cout<<"Nro de bytes por sector: "<<registros*tamanio_registros<<endl;
+										}
 										void menu(){
 											//Menu para el disco
 											int opc;
 											string aux;
-											ifstream ar("titanic.txt");
-
-											string line;
-											getline(ar,line);
-											tamanio_registros=line.size();
-											ar.close();
+											if(tamanio_registros==0){
+												tamanio_registros=Esquema_leer();
+											}
 											cout<<"\nBienvenido al Menu de Disco\n1. insertar datos: "<<endl;
 											cout<<"2. Imprimir sector. "<<endl;
 											cout<<"3. imprimir Registro. "<<endl;
@@ -728,6 +850,11 @@ public:
 											cout<<"5. Imprimir bloque. "<<endl;
 											cout<<"6. Modificar sector. "<<endl;
 											cout<<"7. Buffer Manager."<<endl;
+											cout<<"8. imprimir pista."<<endl;
+											cout<<"9. imprimir superficie."<<endl;
+											cout<<"10. imprimir plato."<<endl;
+											cout<<"11. imprimir disco."<<endl;
+											cout<<"12. mostrar informacion."<<endl;
 											cout<<"Opcion: ";cin>>opc;
 											cin.ignore();
 											if(opc==1){
@@ -744,6 +871,16 @@ public:
 												menu_IEM();
 											}else if(opc==7){
 												BufferManager();
+											}else if(opc==8){
+												imprimir_pista();
+											}else if(opc==9){
+												imprimir_superficie();
+											}else if(opc==10){
+												imprimir_plato();
+											}else if(opc==11){
+												imprimir_disco();
+											}else if(opc==12){
+												mostrar_informacion();
 											}
 											menu();
 										}
@@ -906,11 +1043,50 @@ void esquema(){
 	arch<<cadena<<endl;
 	arch.close();
 }
+	
+	void Esquema_leer(){
+		string nombre;
+		//Para manipular un disco que ya existe
+		//se abre un txt que tiene al disco y se busca por el nombre
+		cout<<"Nombre del disco: ";getline(cin,nombre);
+		ifstream archivo("esquema.txt");
+		string line,aux;
+		//la informacion de cada disco(nombre,superficies,etc)
+		while(!archivo.eof()){
+			getline(archivo,line);
+			if(nombre==line.substr(0,line.find("#"))){ //se divide por "/"
+				aux=line;
+				break;
+			}
+		}
+		archivo.close();
+		if(line.size()!=0){
+			line.erase(0,line.find("#")+1);
+			
+			int cont =0, tam=line.size();
+			string data;
+			while(line.size()>0){
+				data = line.substr(line.find("|")+1,line.find("#")-line.find("|")-1);
+				cout<<data<<endl;
+				if(data=="int64"){
+					cont +=4;	
+				}else if(data=="float64"){
+					cont +=4;
+				}else{
+					string a = data.substr(data.find("(")+1,data.find(")")-data.find("(")-1);
+					cont += stoi(a);
+				}
+				line.erase(0,line.find("#")+1);
+				 
+			}
+			cout<<cont;
+		}
+	}
 int main()
 {				
 	//se define un objero disco
 	Disco disco;
 	menu_inicial(disco);
-
+	//Esquema_leer();
 	return 0;
 }
