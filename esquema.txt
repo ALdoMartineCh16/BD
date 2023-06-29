@@ -1,0 +1,1 @@
+titanic.csv#PassengerId|int64#Survived|int64#Pclass|int64#Name|VARCHAR(20)#Sex|VARCHAR(7)#Age|float64#SibSp|int64#Parch|int64#Ticket|VARCHAR(20)#Fare|float64#Cabin|VARCHAR(30)#Embarked|VARCHAR(20)#
